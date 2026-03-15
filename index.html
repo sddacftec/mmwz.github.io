@@ -3,33 +3,625 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>测试网页 - mmwz.github.io</title>
+  <title>名门望族 - 家族模拟器</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #101325;
+      --bg-panel: #1b1f37;
+      --accent: #d4b36a;
+      --text-main: #f5f6ff;
+      --text-sub: #b8bfdc;
+      --good: #6ad49a;
+      --bad: #f17e7e;
+      --warn: #e9c36f;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: "Microsoft YaHei", sans-serif;
       min-height: 100vh;
+      background: radial-gradient(circle at top, #23284a 0%, var(--bg) 55%);
+      color: var(--text-main);
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .title {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #eee;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .card {
-      padding: 2rem 3rem;
-      background: rgba(255,255,255,0.08);
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+
+    .title h1 {
+      font-size: 30px;
+      letter-spacing: 1px;
+      color: var(--accent);
     }
-    h1 { margin-bottom: 0.5rem; font-size: 1.8rem; }
-    p { color: #aaa; }
+
+    .title p {
+      color: var(--text-sub);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      background: var(--bg-panel);
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat .label {
+      color: var(--text-sub);
+      font-size: 12px;
+    }
+
+    .stat .value {
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 12px;
+      cursor: pointer;
+      color: #101325;
+      background: #f0f3ff;
+      font-weight: 700;
+      transition: transform 0.1s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .btn-main {
+      background: linear-gradient(90deg, #f3d38f, #d4b36a);
+    }
+
+    .btn-sub {
+      background: #dce3ff;
+    }
+
+    .log {
+      max-height: 360px;
+      overflow-y: auto;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.16);
+    }
+
+    .log ul {
+      list-style: none;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .log li {
+      line-height: 1.45;
+      border-left: 3px solid rgba(255, 255, 255, 0.18);
+      padding-left: 8px;
+      color: #e9ecff;
+    }
+
+    .log li.good {
+      border-left-color: var(--good);
+    }
+
+    .log li.bad {
+      border-left-color: var(--bad);
+    }
+
+    .log li.warn {
+      border-left-color: var(--warn);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 6px;
+      text-align: left;
+    }
+
+    th {
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--text-sub);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(212, 179, 106, 0.12);
+      border: 1px solid rgba(212, 179, 106, 0.32);
+      display: none;
+    }
+
+    @media (max-width: 880px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>测试网页</h1>
-    <p>mmwz.github.io — 部署成功</p>
+  <div class="container">
+    <section class="panel">
+      <div class="title">
+        <div>
+          <h1>《名门望族》</h1>
+          <p>简化家族模拟器：经营、联姻、育才，延续百年门第。</p>
+        </div>
+        <button id="restartBtn" class="btn-sub">重新开局</button>
+      </div>
+      <div class="status-grid">
+        <div class="stat"><div class="label">年份</div><div id="year" class="value">-</div></div>
+        <div class="stat"><div class="label">当家人</div><div id="leader" class="value">-</div></div>
+        <div class="stat"><div class="label">家族财富</div><div id="wealth" class="value">-</div></div>
+        <div class="stat"><div class="label">家族声望</div><div id="prestige" class="value">-</div></div>
+        <div class="stat"><div class="label">家族势力</div><div id="influence" class="value">-</div></div>
+        <div class="stat"><div class="label">在册子嗣</div><div id="heirsCount" class="value">-</div></div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel">
+        <h2>年度决策</h2>
+        <p class="hint">每年只能执行一项核心决策。目标：撑过 30 年，打造名门望族。</p>
+        <div class="actions" id="actions"></div>
+        <div class="result" id="resultBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>家族纪事</h2>
+        <div class="log">
+          <ul id="logList"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>族谱（在册子嗣）</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>年龄</th>
+            <th>资质</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody id="heirsTable"></tbody>
+      </table>
+    </section>
   </div>
+
+  <script>
+    const firstNames = ["承", "景", "允", "绍", "修", "文", "怀", "子", "明", "远"];
+    const secondNames = ["安", "宁", "德", "礼", "宏", "曜", "舟", "儒", "山", "川"];
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    const actions = [
+      {
+        key: "trade",
+        name: "经营商号",
+        desc: "财富提升快，但身体消耗较大",
+        exec(state) {
+          let wealthGain = randInt(15, 38);
+          let prestigeGain = randInt(1, 3);
+          let healthCost = randInt(5, 10);
+          if (Math.random() < 0.2) {
+            wealthGain -= randInt(20, 35);
+            state.logs.push({ text: "商路受阻，货物折损。", type: "bad" });
+          }
+          state.wealth += wealthGain;
+          state.prestige += prestigeGain;
+          state.leader.health -= healthCost;
+          return `你全力经营商号，财富 ${wealthGain >= 0 ? "+" : ""}${wealthGain}，声望 +${prestigeGain}。`;
+        }
+      },
+      {
+        key: "network",
+        name: "结交名士",
+        desc: "花钱铺路，提升声望与势力",
+        exec(state) {
+          const cost = randInt(10, 22);
+          const pGain = randInt(5, 13);
+          const iGain = randInt(3, 7);
+          state.wealth -= cost;
+          state.prestige += pGain;
+          state.influence += iGain;
+          if (Math.random() < 0.12) {
+            state.prestige -= 8;
+            state.logs.push({ text: "宴会中失言，惹来闲话。", type: "warn" });
+          }
+          return `你设宴结交名士，财富 -${cost}，声望 +${pGain}，势力 +${iGain}。`;
+        }
+      },
+      {
+        key: "educate",
+        name: "培养子弟",
+        desc: "为后代投资，增强继承质量",
+        exec(state) {
+          const cost = randInt(12, 24);
+          state.wealth -= cost;
+          if (state.heirs.length === 0) {
+            state.prestige += 2;
+            return `你兴办家学（财富 -${cost}）。虽暂无子嗣受教，但乡里对家风称道（声望 +2）。`;
+          }
+          const grown = [];
+          state.heirs.forEach((h) => {
+            const up = randInt(2, 5);
+            h.ability = clamp(h.ability + up, 1, 100);
+            if (up >= 4) {
+              grown.push(`${h.name}（+${up}）`);
+            }
+          });
+          return `你重金延师授业，财富 -${cost}。子弟资质有所精进：${grown.length ? grown.join("、") : "稳步提升"}。`;
+        }
+      },
+      {
+        key: "marriage",
+        name: "联姻扩族",
+        desc: "消耗财富，较高概率新增子嗣",
+        exec(state) {
+          const cost = randInt(16, 30);
+          state.wealth -= cost;
+          state.prestige += randInt(3, 8);
+          let msg = `你推动联姻，财富 -${cost}，家声上扬。`;
+          if (Math.random() < 0.6) {
+            const baby = createHeir(state.generation + 1, 0);
+            state.heirs.push(baby);
+            msg += ` 喜得子嗣：${baby.name}。`;
+          }
+          return msg;
+        }
+      },
+      {
+        key: "rest",
+        name: "修身养息",
+        desc: "恢复当家人健康，风险最低",
+        exec(state) {
+          const heal = randInt(10, 20);
+          state.leader.health = clamp(state.leader.health + heal, 1, 100);
+          state.prestige += 1;
+          return `你暂缓扩张，修身养息，当家人健康 +${heal}。`;
+        }
+      }
+    ];
+
+    function createHeir(generation, age = 0) {
+      return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name: pick(firstNames) + pick(secondNames),
+        age,
+        ability: randInt(35, 75),
+        health: randInt(70, 100),
+        generation
+      };
+    }
+
+    function createInitialState() {
+      return {
+        year: 1,
+        targetYear: 30,
+        generation: 1,
+        wealth: 120,
+        prestige: 35,
+        influence: 22,
+        slumpYears: 0,
+        gameOver: false,
+        winner: false,
+        leader: {
+          name: "顾承安",
+          age: 24,
+          health: 90,
+          ability: 68,
+          generation: 1
+        },
+        heirs: [createHeir(2, 2)],
+        logs: []
+      };
+    }
+
+    let state = createInitialState();
+
+    const refs = {
+      year: document.getElementById("year"),
+      leader: document.getElementById("leader"),
+      wealth: document.getElementById("wealth"),
+      prestige: document.getElementById("prestige"),
+      influence: document.getElementById("influence"),
+      heirsCount: document.getElementById("heirsCount"),
+      actions: document.getElementById("actions"),
+      logList: document.getElementById("logList"),
+      heirsTable: document.getElementById("heirsTable"),
+      resultBox: document.getElementById("resultBox"),
+      restartBtn: document.getElementById("restartBtn")
+    };
+
+    function addLog(text, type = "") {
+      state.logs.unshift({ text, type });
+      state.logs = state.logs.slice(0, 60);
+    }
+
+    function ageFamilyOneYear() {
+      state.leader.age += 1;
+      state.heirs.forEach((h) => {
+        h.age += 1;
+        if (Math.random() < 0.05) {
+          h.ability = clamp(h.ability + randInt(1, 3), 1, 100);
+        }
+      });
+    }
+
+    function annualMaintenance() {
+      const cost = 8 + state.heirs.length * 2;
+      state.wealth -= cost;
+      addLog(`家族维持开支：-${cost} 财富。`);
+    }
+
+    function triggerRandomEvent() {
+      const roll = Math.random();
+      if (roll < 0.12) {
+        const gain = randInt(12, 26);
+        state.wealth += gain;
+        addLog(`旧友引荐商机，意外获利 +${gain}。`, "good");
+      } else if (roll < 0.2) {
+        const loss = randInt(10, 24);
+        state.wealth -= loss;
+        addLog(`遭遇天灾，庄田受损，财富 -${loss}。`, "bad");
+      } else if (roll < 0.26) {
+        const gain = randInt(5, 12);
+        state.prestige += gain;
+        addLog(`乡试报捷，家族声名远播，声望 +${gain}。`, "good");
+      } else if (roll < 0.31) {
+        const drop = randInt(6, 12);
+        state.prestige -= drop;
+        addLog(`流言四起，家族清誉受挫，声望 -${drop}。`, "warn");
+      }
+    }
+
+    function maybeSuccession() {
+      const mortality = Math.max(0, (state.leader.age - 56) * 0.03) + (100 - state.leader.health) * 0.002;
+      const leaderFalls = state.leader.health <= 0 || Math.random() < mortality;
+      if (!leaderFalls) {
+        return;
+      }
+
+      const adultHeirs = state.heirs.filter((h) => h.age >= 18 && h.health > 0);
+      if (adultHeirs.length === 0) {
+        state.gameOver = true;
+        addLog("当家人离世且无成年继承人，家族血脉断绝。", "bad");
+        return;
+      }
+
+      adultHeirs.sort((a, b) => (b.ability + b.health * 0.2) - (a.ability + a.health * 0.2));
+      const next = adultHeirs[0];
+      state.heirs = state.heirs.filter((h) => h.id !== next.id);
+      state.generation += 1;
+      state.leader = {
+        name: next.name,
+        age: next.age,
+        health: clamp(next.health + randInt(-8, 10), 30, 100),
+        ability: next.ability,
+        generation: state.generation
+      };
+      addLog(`家主更替：第${state.generation}代 ${state.leader.name} 继任。`, "warn");
+      state.prestige += 6;
+    }
+
+    function applyBoundsAndRisks() {
+      state.wealth = Math.round(state.wealth);
+      state.prestige = clamp(Math.round(state.prestige), 0, 999);
+      state.influence = clamp(Math.round(state.influence), 0, 999);
+      state.leader.health = clamp(Math.round(state.leader.health), 0, 100);
+
+      if (state.wealth < 0) {
+        state.slumpYears += 1;
+        addLog("家族入不敷出，账面赤字。", "bad");
+      } else {
+        state.slumpYears = 0;
+      }
+
+      if (state.wealth <= -80 || state.slumpYears >= 3) {
+        state.gameOver = true;
+        addLog("债台高筑，族产尽失，家道中落。", "bad");
+      }
+
+      if (state.prestige <= 0) {
+        state.gameOver = true;
+        addLog("声望尽失，门庭冷落。", "bad");
+      }
+    }
+
+    function judgeWin() {
+      if (state.gameOver) {
+        return;
+      }
+      if (state.year > state.targetYear) {
+        const score = state.wealth * 0.45 + state.prestige * 2 + state.influence * 1.5 + state.heirs.length * 18;
+        if (score >= 520 && state.prestige >= 90 && state.wealth >= 180) {
+          state.winner = true;
+          state.gameOver = true;
+          addLog("你成功跻身士林商界，顾氏成为一代名门望族！", "good");
+        } else {
+          state.gameOver = true;
+          addLog("三十载已过，家族虽存，却未成望族。可再开一局冲击更高门第。", "warn");
+        }
+      }
+    }
+
+    function runYear(action) {
+      if (state.gameOver) return;
+      const actionMsg = action.exec(state);
+      addLog(`【第${state.year}年】${actionMsg}`);
+      ageFamilyOneYear();
+      annualMaintenance();
+      triggerRandomEvent();
+      maybeSuccession();
+      applyBoundsAndRisks();
+      state.year += 1;
+      judgeWin();
+      render();
+    }
+
+    function renderActions() {
+      refs.actions.innerHTML = "";
+      actions.forEach((action) => {
+        const btn = document.createElement("button");
+        btn.className = action.key === "trade" ? "btn-main" : "btn-sub";
+        btn.disabled = state.gameOver;
+        btn.innerHTML = `${action.name}<br><small>${action.desc}</small>`;
+        btn.addEventListener("click", () => runYear(action));
+        refs.actions.appendChild(btn);
+      });
+    }
+
+    function renderHeirs() {
+      refs.heirsTable.innerHTML = "";
+      if (state.heirs.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = "<td colspan='4'>暂无在册子嗣</td>";
+        refs.heirsTable.appendChild(tr);
+        return;
+      }
+      const sorted = [...state.heirs].sort((a, b) => b.age - a.age);
+      sorted.forEach((h) => {
+        const tr = document.createElement("tr");
+        const status = h.age >= 18 ? "可继承" : "未成年";
+        tr.innerHTML = `
+          <td>${h.name}</td>
+          <td>${h.age}</td>
+          <td>${h.ability}</td>
+          <td>${status}</td>
+        `;
+        refs.heirsTable.appendChild(tr);
+      });
+    }
+
+    function renderLogs() {
+      refs.logList.innerHTML = "";
+      state.logs.forEach((log) => {
+        const li = document.createElement("li");
+        li.textContent = log.text;
+        if (log.type) li.classList.add(log.type);
+        refs.logList.appendChild(li);
+      });
+    }
+
+    function renderResult() {
+      if (!state.gameOver) {
+        refs.resultBox.style.display = "none";
+        return;
+      }
+      refs.resultBox.style.display = "block";
+      if (state.winner) {
+        refs.resultBox.innerHTML = `🏆 <strong>结局：名门望族</strong><br>
+          历经 ${state.year - 1} 年，顾氏富有 ${state.wealth}、声望 ${state.prestige}、势力 ${state.influence}。`;
+      } else {
+        refs.resultBox.innerHTML = `📜 <strong>结局：家道未兴</strong><br>
+          最终财富 ${state.wealth}、声望 ${state.prestige}、势力 ${state.influence}。再试一次，改写族运。`;
+      }
+    }
+
+    function render() {
+      refs.year.textContent = `第 ${Math.min(state.year, state.targetYear)} 年 / 共 ${state.targetYear} 年`;
+      refs.leader.textContent = `${state.leader.name}（${state.leader.age}岁，健康${state.leader.health}）`;
+      refs.wealth.textContent = state.wealth;
+      refs.prestige.textContent = state.prestige;
+      refs.influence.textContent = state.influence;
+      refs.heirsCount.textContent = state.heirs.length;
+      renderActions();
+      renderHeirs();
+      renderLogs();
+      renderResult();
+    }
+
+    function resetGame() {
+      state = createInitialState();
+      addLog("顾氏立族，家主顾承安接掌门户。");
+      addLog("目标：30年内积累财富与声望，成就名门望族。", "warn");
+      render();
+    }
+
+    refs.restartBtn.addEventListener("click", resetGame);
+    resetGame();
+  </script>
 </body>
 </html>
