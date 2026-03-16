@@ -17,6 +17,10 @@
 
 直接用浏览器打开 `index.html` 即可游玩。
 
+线上访问地址（GitHub Pages）：
+
+- https://sddacftec.github.io/mmwz.github.io/
+
 ## 主要系统
 
 - 年度决策：经营商号、结交名士、培养子弟、联姻扩族、修身养息

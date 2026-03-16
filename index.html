@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/mmwz.github.io/">
   <title>名门望族 - 家族模拟器</title>
   <style>
     :root {
@@ -261,6 +262,14 @@
   </div>
 
   <script>
+    (function ensureProjectPath() {
+      const isTargetPagesHost = window.location.hostname === "sddacftec.github.io";
+      const atExpectedPath = window.location.pathname.startsWith("/mmwz.github.io/");
+      if (isTargetPagesHost && !atExpectedPath) {
+        window.location.replace("/mmwz.github.io/");
+      }
+    })();
+
     const firstNames = ["承", "景", "允", "绍", "修", "文", "怀", "子", "明", "远"];
     const secondNames = ["安", "宁", "德", "礼", "宏", "曜", "舟", "儒", "山", "川"];
 
